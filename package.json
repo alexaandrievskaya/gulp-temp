@@ -1,0 +1,24 @@
+{
+  "name": "gulp-temp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/alexaandrievskaya/gulp-temp.git",
+  "author": "alexa_andri <48593313+alexaandrievskaya@users.noreply.github.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "9.8.6",
+    "browser-sync": "^2.26.12",
+    "cssnano": "^4.1.10",
+    "gulp": "^4.0.2",
+    "gulp-csscomb": "^3.1.0",
+    "gulp-notify": "^3.2.0",
+    "gulp-postcss": "^9.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^4.1.0"
+  },
+  "dependencies": {
+    "bootstrap": "^4.5.2",
+    "jquery": "^3.5.1",
+    "normalize-sass": "^1.0.0"
+  }
+}
