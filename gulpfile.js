@@ -11,6 +11,11 @@ const postcss = require('gulp-postcss');
 const csscomb = require('gulp-csscomb');
 const notify = require('gulp-notify');
 const autoprefixer = require('autoprefixer');
+const mqpacker = require('css-mqpacker');
+const sortCSSmq = require('sort-css-media-queries');
+const uglify = require('gulp-uglify');
+const terser = require('gulp-terser');
+const concat = require('gulp-concat');
 
 //оптимизация работы с путями
 const PATH = {
@@ -18,15 +23,24 @@ const PATH = {
     scssFiles: './assets/scss/**/*.s[ca]ss',
     scssFolder: './assets/scss',
     cssFolder: './assets/css',
+    cssDestFolder: './dest/css',
     htmlFiles: './*.html',
-    jsFiles: './assets/js/**/*.js',
+    jsFiles: [
+        './assets/js/**/*.js', 
+        '!./assets/js/**/*.min.js',
+        '!./assets/js/**/all.*',
+    ], //в массиве можем настроить значения, которые нам не нужны
+    jsFolder: './assets/js',
+    jsDestFolder: './dest/js',
+    jsBundleName: 'all.js',
 }
 
 const plugins = [
     autoprefixer({ 
         overrideBrowserslist: ['last 5 versions', '> 0.1%'], 
         cascade: true, 
-    })
+    }),
+    mqpacker({ sort: sortCSSmq }) //переключение режима сортировки
 ];
 
 function scss() {
@@ -68,6 +82,43 @@ function comb() {
     .pipe(dest(PATH.scssFolder));
 }
 
+function concatJS() {
+    return src(PATH.jsFiles)
+    .pipe(concat(PATH.jsBundleName))
+    .pipe(dest(PATH.jsFolder));
+} //создаем отдельный файл в который выгружаем указанные нами файлы с учетом исключений
+
+function uglifyJS() {
+    return src(PATH.jsFiles)
+    .pipe(uglify({toplevel: true, output: {
+        quote_style: 3
+    }}))
+    .pipe(rename({suffix: '.min'}))
+    .pipe(dest(PATH.jsFolder));
+} //минификация
+
+function uglifyES6() {
+    return src(PATH.jsFiles)
+    .pipe(terser({
+        toplevel: true, 
+        output: {
+        quote_style: 3
+        }
+    }))
+    .pipe(rename({suffix: '.min'}))
+    .pipe(dest(PATH.jsFolder));
+}
+
+function bundleJS() {
+    return src(PATH.jsDestFolder + '/all.js')
+    .pipe(dest(PATH.jsDestFolder));
+}
+
+function bundleCSS() {
+    return src(PATH.cssFolder + '/*.min.css')
+    .pipe(dest(PATH.cssDestFolder));
+}
+
 function syncInit() {
     bs.init({
         server: {
@@ -97,3 +148,7 @@ task('scss', series(scss, scssMin));
 task('min', scssMin);
 task('comb', comb);
 task('dev', scssDev);
+task('concatjs', concatJS);
+task('uglifyjs', uglifyJS);
+task('uglifyjses6', uglifyES6);
+task('bundle', parallel(bundleCSS, bundleJS));
